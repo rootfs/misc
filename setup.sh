@@ -76,7 +76,9 @@ cat > hadoop/etc/hadoop/core-site.xml.ceph << EOF
 </configuration>
 EOF
 
+# use hdfs for now
 ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.hdfs hadoop/etc/hadoop/core-site.xml
+rm -rf /tmp/hadoop-hadoop/dfs
 
 cat > hadoop/etc/hadoop/mapred-site.xml << EOF
 <configuration>
