@@ -1,6 +1,7 @@
 sudo useradd -c "hadoop" -d /home/hadoop -m -s /bin/bash hadoop
 echo "hadoop:hadoop" |sudo chpasswd
+sudo -u hadoop rm -rf /home/hadoop/.ssh
 sudo -u hadoop ssh-keygen -f /home/hadoop/.ssh/id_rsa -t rsa -N ''
-
+chmod 666 *jar
+sudo -u hadoop cp *jar ~hadoop/
 sudo -u hadoop bash setup.sh
-sudo -u hadoop echo "export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/" >> /home/hadoop/.bashrc

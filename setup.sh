@@ -96,12 +96,23 @@ cat > hadoop/etc/hadoop/yarn-site.xml << EOF
 </configuration>
 EOF
 
+# config java home
+echo "export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/" >> /home/hadoop/.bashrc
+
 # install ceph jar
 ln -fs `pwd`/*.jar hadoop/share/hadoop/common/
 
 # start hadoop
 if [ `hostname` == ${namenode} ] 
 then
-    hadoop/hadoop/sbin/start-yarn.sh
+    for i in ${nodes[@]}
+    do 
+        echo -n "copy ssh key to " 
+        echo $i
+        cat /home/hadoop/.ssh/id_rsa.pub | ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
+    done
+    
+    export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
+    hadoop/sbin/start-yarn.sh
 fi
 
