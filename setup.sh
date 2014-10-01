@@ -26,7 +26,16 @@ done
 
 # choose the last node as namenode
 namenode=$i
-cat > hadoop/etc/hadoop/core-site.xml << EOF
+cat > hadoop/etc/hadoop/core-site.xml.hdfs << EOF
+<configuration>
+     <property>
+         <name>fs.defaultFS</name>
+         <value>hdfs://${namenode}:9000</value>
+     </property>
+</configuration>
+EOF
+
+cat > hadoop/etc/hadoop/core-site.xml.ceph << EOF
 <configuration>
   <property>
     <name>fs.default.name</name>
@@ -64,6 +73,8 @@ cat > hadoop/etc/hadoop/core-site.xml << EOF
   </property>
 </configuration>
 EOF
+
+ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.hdfs hadoop/etc/hadoop/core-site.xml
 
 cat > hadoop/etc/hadoop/mapred-site.xml << EOF
 <configuration>
@@ -107,6 +118,15 @@ cat > hadoop/etc/hadoop/yarn-site.xml << EOF
 </configuration>
 EOF
 
+cat > hadoop/etc/hadoop/hdfs-site.xml << EOF
+<configuration>
+     <property>
+         <name>dfs.replication</name>
+         <value>3</value>
+     </property>
+</configuration>
+EOF
+
 # config java home
 echo "export JAVA_HOME=/usr/lib/jvm/default-java" > /home/hadoop/.bashrc
 
@@ -122,8 +142,16 @@ then
         echo $i
         cat /home/hadoop/.ssh/id_rsa.pub | ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
     done
-    
+
+    hadoop/sbin/stop-dfs.sh
+    hadoop/bin/hdfs namenode -format
+
     hadoop/sbin/stop-yarn.sh
+    hadoop/sbin/start-dfs.sh
     hadoop/sbin/start-yarn.sh
+    echo "checking nodes ..."
+    ./hadoop/bin/yarn node -list
+    echo "check storage space ..."
+    hadoop/bin/hadoop fs -df /
 fi
 
