@@ -76,7 +76,7 @@ cat > hadoop/etc/hadoop/core-site.xml.ceph << EOF
 </configuration>
 EOF
 
-# use hdfs for now
+# choose hdfs or ceph
 if [ ${USE_HDFS} -ne 0  ]
 then
     ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.hdfs hadoop/etc/hadoop/core-site.xml
@@ -164,6 +164,6 @@ then
     echo "checking nodes ..."
     ./hadoop/bin/yarn node -list
     echo "check storage space ..."
-    hadoop/bin/hadoop fs -df /
+    hadoop/bin/hadoop fs -df -h /
 fi
 
