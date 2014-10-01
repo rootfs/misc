@@ -77,8 +77,21 @@ cat > hadoop/etc/hadoop/core-site.xml.ceph << EOF
 EOF
 
 # use hdfs for now
-ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.hdfs hadoop/etc/hadoop/core-site.xml
-rm -rf /tmp/hadoop-hadoop/dfs
+if [ ${USE_HDFS} -ne 0  ]
+then
+    ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.hdfs hadoop/etc/hadoop/core-site.xml
+    rm -rf /tmp/hadoop-hadoop/dfs
+    cat > hadoop/etc/hadoop/hdfs-site.xml << EOF
+<configuration>
+     <property>
+         <name>dfs.replication</name>
+         <value>3</value>
+     </property>
+</configuration>
+EOF
+else
+    ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.ceph hadoop/etc/hadoop/core-site.xml
+fi
 
 cat > hadoop/etc/hadoop/mapred-site.xml << EOF
 <configuration>
@@ -122,14 +135,6 @@ cat > hadoop/etc/hadoop/yarn-site.xml << EOF
 </configuration>
 EOF
 
-cat > hadoop/etc/hadoop/hdfs-site.xml << EOF
-<configuration>
-     <property>
-         <name>dfs.replication</name>
-         <value>3</value>
-     </property>
-</configuration>
-EOF
 
 # config java home
 echo "export JAVA_HOME=/usr/lib/jvm/default-java" > /home/hadoop/.bashrc
@@ -146,12 +151,15 @@ then
         echo $i
         cat /home/hadoop/.ssh/id_rsa.pub | /tmp/bd/sshpass -p ${password} ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
     done
-
-    hadoop/sbin/stop-dfs.sh
-    hadoop/bin/hdfs namenode -format
+    if [ ${USE_HDFS} -ne 0  ]
+    then
+        hadoop/sbin/stop-dfs.sh
+        hadoop/bin/hdfs namenode -format
+        hadoop/sbin/start-dfs.sh
+    fi
 
     hadoop/sbin/stop-yarn.sh
-    hadoop/sbin/start-dfs.sh
+
     hadoop/sbin/start-yarn.sh
     echo "checking nodes ..."
     ./hadoop/bin/yarn node -list
