@@ -1,11 +1,22 @@
 nodes=("plana04" "plana51" "plana55" "plana85")
 HADOOP_VERSION="2.4.1"
 
+cat > /home/hadoop/.ssh/config <<EOF
+Host *
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null
+EOF
+
 cd /home/hadoop
 
-wget -q http://www.us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
-tar xzf hadoop-${HADOOP_VERSION}.tar.gz 
-ln -fs `pwd`/hadoop-${HADOOP_VERSION} hadoop
+rm -rf hadoop-${HADOOP_VERSION}*
+ 
+if [ ! -f hadoop-${HADOOP_VERSION}.tar.gz ]
+then
+    wget -q http://www.us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+    tar xzf hadoop-${HADOOP_VERSION}.tar.gz 
+    ln -fs `pwd`/hadoop-${HADOOP_VERSION} hadoop
+fi
 
 rm -f hadoop/etc/hadoop/slaves
 for i in ${nodes[@]}
@@ -97,7 +108,7 @@ cat > hadoop/etc/hadoop/yarn-site.xml << EOF
 EOF
 
 # config java home
-echo "export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/" >> /home/hadoop/.bashrc
+echo "export JAVA_HOME=/usr/lib/jvm/default-java" > /home/hadoop/.bashrc
 
 # install ceph jar
 ln -fs `pwd`/*.jar hadoop/share/hadoop/common/
@@ -112,7 +123,7 @@ then
         cat /home/hadoop/.ssh/id_rsa.pub | ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
     done
     
-    export JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64/
+    hadoop/sbin/stop-yarn.sh
     hadoop/sbin/start-yarn.sh
 fi
 
