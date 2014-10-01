@@ -1,4 +1,6 @@
-nodes=("plana04" "plana51" "plana55" "plana85")
+source /tmp/bd/nodes.cfg
+source /tmp/bd/pass.cfg
+
 HADOOP_VERSION="2.4.1"
 
 cat > /home/hadoop/.ssh/config <<EOF
@@ -140,7 +142,7 @@ then
     do 
         echo -n "copy ssh key to " 
         echo $i
-        cat /home/hadoop/.ssh/id_rsa.pub | ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
+        cat /home/hadoop/.ssh/id_rsa.pub | /tmp/bd/sshpass -p ${password} ssh hadoop@${i} 'cat >> /home/hadoop/.ssh/authorized_keys'
     done
 
     hadoop/sbin/stop-dfs.sh
