@@ -96,4 +96,12 @@ cat > hadoop/etc/hadoop/yarn-site.xml << EOF
 </configuration>
 EOF
 
+# install ceph jar
+ln -fs `pwd`/*.jar hadoop/share/hadoop/common/
+
+# start hadoop
+if [ `hostname` == ${namenode} ] 
+then
+    hadoop/hadoop/sbin/start-yarn.sh
+fi
 
