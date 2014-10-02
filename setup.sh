@@ -85,7 +85,7 @@ then
 <configuration>
      <property>
          <name>dfs.replication</name>
-         <value>3</value>
+         <value>1</value>
      </property>
 </configuration>
 EOF
