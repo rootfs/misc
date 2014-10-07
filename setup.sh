@@ -51,19 +51,17 @@ cat > hadoop/etc/hadoop/core-site.xml.ceph << EOF
     <name>ceph.conf.file</name>
     <value>/etc/ceph/ceph.conf</value>
   </property>
-  <!--
-     <property>
-       <name>ceph.mon.address</name>
-       <value>localhost:6789</value>
-     </property>
-     <property>
-       <name>ceph.auth.id</name>
-       <value>root</value>
-     </property>
-     -->
+  <property>
+    <name>ceph.mon.address</name>
+    <value>${namenode}:6789</value>
+  </property>
+  <property>
+    <name>ceph.auth.id</name>
+    <value>admin</value>
+  </property>
   <property>
     <name>ceph.data.pools</name>
-    <value>data</value>
+    <value>cephfs_data</value>
   </property>
   <property>
     <name>fs.AbstractFileSystem.ceph.impl</name>
@@ -89,8 +87,10 @@ then
      </property>
 </configuration>
 EOF
-else
+else    
     ln -fs `pwd`/hadoop/etc/hadoop/core-site.xml.ceph hadoop/etc/hadoop/core-site.xml
+    #FIXME
+    ln -fs /usr/lib/jni/libcephfs_jni.so /home/hadoop/hadoop/lib/native/
 fi
 
 cat > hadoop/etc/hadoop/mapred-site.xml << EOF

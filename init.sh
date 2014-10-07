@@ -1,4 +1,5 @@
 source pass.cfg
+source nodes.cfg
 #echo -n "password "
 #echo $password
 sudo useradd -c "hadoop" -d /home/hadoop -m -s /bin/bash hadoop
@@ -9,4 +10,9 @@ sudo -u hadoop rm -rf /home/hadoop/.ssh
 sudo -u hadoop ssh-keygen -f /home/hadoop/.ssh/id_rsa -t rsa -N ''
 chmod 666 *jar
 sudo -u hadoop cp *jar ~hadoop/
+if [ ${USE_HDFS} -eq 0  ]
+then
+  #FIXME: remove this
+  sudo chmod 644 /etc/ceph/ceph.client.admin.keyring
+fi
 sudo -i -u hadoop bash /tmp/bd/setup.sh
